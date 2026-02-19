@@ -12,13 +12,13 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     pname = "opencode";
-    version = "1.2.6";
+    version = "1.2.8";
 
     opencode = pkgs.stdenv.mkDerivation rec {
       inherit pname version;
       src = pkgs.fetchzip {
         url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-baseline.tar.gz";
-        hash = "sha256-W/mV0Frz/oFb+9iRUC65ub4nb9UUallAXD9n1QCSrJk=";
+        hash = "sha256-NG+mizsQQGrq2uD2w5sgyj3kmt2ODee6zZMUTksQxUg=";
         stripRoot = false;
       };
 
@@ -49,7 +49,7 @@
       inherit pname version;
       src = pkgs.fetchzip {
         url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64.tar.gz";
-        hash = "sha256-6p9ndDH0nwbazMsY6XtHn+fnm6rS9t5+z2wYGqFSq94=";
+        hash = "sha256-MIcpcZ1IBPaNt74dXtMsV1DSVyXL3o34X55sVsJ5OEI=";
         stripRoot = false;
       };
 
