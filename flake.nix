@@ -1,5 +1,5 @@
 {
-  description = "OpenCode baseline binary for x86_64-linux (non-AVX)";
+  description = "OpenCode binaries";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -9,84 +9,31 @@
     self,
     nixpkgs,
   }: let
-    system = "x86_64-linux";
-    pkgs = nixpkgs.legacyPackages.${system};
-    pname = "opencode";
-    version = "1.2.8";
+    supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    pkgsBySystem = nixpkgs.lib.getAttrs supportedSystems nixpkgs.legacyPackages;
+    forAllPkgs = fn: nixpkgs.lib.mapAttrs (system: pkgs: (fn system pkgs)) pkgsBySystem;
 
-    opencode = pkgs.stdenv.mkDerivation rec {
-      inherit pname version;
-      src = pkgs.fetchzip {
-        url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-baseline.tar.gz";
-        hash = "sha256-NG+mizsQQGrq2uD2w5sgyj3kmt2ODee6zZMUTksQxUg=";
-        stripRoot = false;
-      };
-
-      nativeBuildInputs = [pkgs.patchelf];
-
-      dontConfigure = true;
-      dontBuild = true;
-      dontStrip = true;
-      dontPatchELF = true;
-
-      installPhase = ''
-        runHook preInstall
-        install -Dm755 opencode $out/bin/opencode
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/opencode
-        runHook postInstall
-      '';
-
-      meta = with pkgs.lib; {
-        description = "AI coding agent built for the terminal";
-        homepage = "https://github.com/anomalyco/opencode";
-        license = licenses.mit;
-        platforms = ["x86_64-linux"];
-        mainProgram = "opencode";
-      };
-    };
-
-    avx = pkgs.stdenv.mkDerivation rec {
-      inherit pname version;
-      src = pkgs.fetchzip {
-        url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64.tar.gz";
-        hash = "sha256-MIcpcZ1IBPaNt74dXtMsV1DSVyXL3o34X55sVsJ5OEI=";
-        stripRoot = false;
-      };
-
-      nativeBuildInputs = [pkgs.patchelf];
-
-      dontConfigure = true;
-      dontBuild = true;
-      dontStrip = true;
-      dontPatchELF = true;
-
-      installPhase = ''
-        runHook preInstall
-        install -Dm755 opencode $out/bin/opencode
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/opencode
-        runHook postInstall
-      '';
-
-      meta = with pkgs.lib; {
-        description = "AI coding agent built for the terminal";
-        homepage = "https://github.com/anomalyco/opencode";
-        license = licenses.mit;
-        platforms = ["x86_64-linux"];
-        mainProgram = "opencode";
-      };
-    };
+    avxSystems = ["x86_64-linux" "x86_64-darwin"];
   in {
-    formatter.${system} = pkgs.alejandra;
-    packages.${system} = {
-      inherit opencode;
-      default = opencode;
-      opencode-avx = avx;
-    };
+    formatter = forAllPkgs (system: pkgs: pkgs.alejandra);
 
-    # Also expose as an overlay for use in other flakes
+    packages = forAllPkgs (system: pkgs:
+      {
+        default = pkgs.callPackage ./pkgs/opencode.nix {};
+        opencode = pkgs.callPackage ./pkgs/opencode.nix {};
+      }
+      // nixpkgs.lib.optionalAttrs (builtins.elem system avxSystems) {
+        opencode-avx = pkgs.callPackage ./pkgs/opencode-avx.nix {};
+      });
+
+    devShells = forAllPkgs (system: pkgs: {
+      default = pkgs.mkShell {
+        packages = [pkgs.nix-update];
+      };
+    });
+
     overlays.default = final: prev: {
-      opencode = opencode;
-      opencode-avx = avx;
+      opencode = final.callPackage ./pkgs/opencode.nix {};
     };
   };
 }
