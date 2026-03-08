@@ -4,7 +4,7 @@
   fetchzip,
   patchelf,
 }: let
-  version = "1.2.16";
+  version = "1.2.21";
   srcs = {
     "x86_64-linux" = fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64.tar.gz";
