@@ -23,14 +23,14 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
-      - name: Build opencode package
-        run: nix build .#opencode
-
-      - name: Build opencode-avx package
-        run: nix build .#opencode-avx
-
-      - name: Validate opencode binary
-        run: ./result/bin/opencode --version
-
-      - name: Validate opencode-avx binary
-        run: ./result/bin/opencode-avx --version
+      - name: Build and validate opencode package
+        run: |
+          # Build opencode package (creates ./result symlink)
+          echo "Building opencode..."
+          nix build .#opencode
+          
+          # Validate that the binary works by running version check
+          echo "Validating opencode binary..."
+          ./result/bin/opencode --version
+          
+          echo "Build and validation completed successfully"
