@@ -23,18 +23,15 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
-      - name: Build opencode package
-        run: nix build .#opencode --no-link
-
-      - name: Build opencode-avx package
-        run: nix build .#opencode-avx --no-link
+      - name: Build opencode and opencode-avx packages
+        run: nix build .#opencode .#opencode-avx
 
       - name: Start OpenCode server
         id: opencode-server
         run: |
-          # Start the server in the background using the built binary
+          # Start the server in the background using the built opencode binary
           echo "Starting OpenCode server from opencode build..."
-          ./result/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
+          ./result-opencode/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
           SERVER_PID=$!
           
           # Wait for server to start (max 30 seconds)

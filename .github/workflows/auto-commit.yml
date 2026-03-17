@@ -26,11 +26,11 @@ jobs:
       - name: Build and validate packages
         id: build-test
         run: |
-          # Build both packages
+          # Build both packages (creates ./result symlinks)
           echo "Building opencode..."
-          nix build .#opencode --no-link
+          nix build .#opencode
           echo "Building opencode-avx..."
-          nix build .#opencode-avx --no-link
+          nix build .#opencode-avx
           
           # Start OpenCode server for health check using the built binary
           echo "Starting OpenCode server..."
