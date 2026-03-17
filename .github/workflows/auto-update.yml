@@ -28,9 +28,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Run update.sh - it uses nix-update --commit, so it creates commits if there are changes
+          # Run update.sh using nix shell to provide nix-update
           chmod +x ./update.sh
-          ./update.sh
+          nix develop --command ./update.sh
           
           # Check if any new commits were made
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
@@ -48,15 +48,9 @@ jobs:
           
           echo "Validating binaries..."
           ./result/bin/opencode --version
-          
-          # We don't have a result-opencode-avx link unless we specify it, 
-          # but we built it. Let's just run it via nix run or similar.
           nix run .#opencode-avx -- --version
 
       - name: Push updates
         if: steps.update.outputs.updates_found == 'true'
         run: |
-          # Amend commits to add [skip ci] if we want to prevent re-triggering, 
-          # but since it's a schedule, it's fine. 
-          # However, let's push the new commits.
           git push origin main

@@ -33,9 +33,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Run update.sh - it uses nix-update --commit, so it creates commits if there are changes
+          # Run update.sh using nix shell to provide nix-update
           chmod +x ./update.sh
-          ./update.sh
+          nix develop --command ./update.sh
           
           # Check if any new commits were made
           if [ "$(git rev-parse HEAD)" != "update-flake-${{ github.run_id }}" ]; then
@@ -43,8 +43,6 @@ jobs:
           else
             echo "updates_found=false" >> $GITHUB_OUTPUT
           fi
-        # Note: nix-update --commit might fail if it can't commit, 
-        # but let's assume it works with the configured git.
 
       - name: Build and validate updates
         if: steps.update.outputs.updates_found == 'true'
