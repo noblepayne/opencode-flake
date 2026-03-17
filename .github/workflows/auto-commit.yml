@@ -1,0 +1,52 @@
+name: Auto Commit
+
+on:
+  schedule:
+    - cron: '0 0,12 * * *'  # Runs at 00:00 and 12:00 UTC (twice daily)
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Needed to commit and push
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git operations
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Use the GitHub token for authentication
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
+      - name: Update timestamp file
+        run: |
+          # Create or update a timestamp file
+          echo "Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" > timestamp.txt
+          echo "Commit triggered by GitHub Actions at $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> timestamp.txt
+          echo "" >> timestamp.txt  # Add empty line for readability
+
+      - name: Commit changes
+        run: |
+          git add timestamp.txt
+          # Only commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-update timestamp [skip ci]"
+            echo "Changes committed"
+          else
+            echo "No changes to commit"
+            exit 0
+          fi
+
+      - name: Push changes
+        run: |
+          git push origin HEAD:${{ github.ref }}
+          echo "Changes pushed successfully"
