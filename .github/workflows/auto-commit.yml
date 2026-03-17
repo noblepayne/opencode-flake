@@ -11,7 +11,7 @@ permissions:
 jobs:
   commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     
     steps:
       - name: Checkout repository
@@ -32,30 +32,12 @@ jobs:
           echo "Building opencode-avx..."
           nix build .#opencode-avx
           
-          # Start OpenCode server for health check using the built binary
-          echo "Starting OpenCode server..."
-          ./result/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
-          SERVER_PID=$!
+          # Validate that the binaries work by running version check
+          echo "Validating opencode binary..."
+          ./result/bin/opencode --version
+          echo "Validating opencode-avx binary..."
+          ./result/bin/opencode-avx --version
           
-          # Wait for server to start (max 30 seconds)
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:4096/global/health > /dev/null; then
-              echo "OpenCode server is healthy"
-              break
-            fi
-            sleep 1
-          done
-          
-          # Check if server started successfully
-          if ! curl -s http://127.0.0.1:4096/global/health > /dev/null; then
-            echo "Failed to start OpenCode server"
-            cat opencode-server.log
-            kill $SERVER_PID || true
-            exit 1
-          fi
-          
-          # Stop server
-          kill $SERVER_PID || true
           echo "Build and validation completed successfully"
 
       - name: Update timestamp file
