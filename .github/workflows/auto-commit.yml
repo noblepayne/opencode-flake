@@ -11,7 +11,7 @@ permissions:
 jobs:
   commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     
     steps:
       - name: Checkout repository
@@ -20,14 +20,46 @@ jobs:
           fetch-depth: 0  # Need full history for git operations
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure Git
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Build and validate packages
+        id: build-test
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Use the GitHub token for authentication
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          # Build both packages
+          echo "Building opencode..."
+          nix build .#opencode --no-link
+          echo "Building opencode-avx..."
+          nix build .#opencode-avx --no-link
+          
+          # Start OpenCode server for health check using the built binary
+          echo "Starting OpenCode server..."
+          ./result/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
+          SERVER_PID=$!
+          
+          # Wait for server to start (max 30 seconds)
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:4096/global/health > /dev/null; then
+              echo "OpenCode server is healthy"
+              break
+            fi
+            sleep 1
+          done
+          
+          # Check if server started successfully
+          if ! curl -s http://127.0.0.1:4096/global/health > /dev/null; then
+            echo "Failed to start OpenCode server"
+            cat opencode-server.log
+            kill $SERVER_PID || true
+            exit 1
+          fi
+          
+          # Stop server
+          kill $SERVER_PID || true
+          echo "Build and validation completed successfully"
 
       - name: Update timestamp file
+        if: steps.build-test.outcome == 'success'
         run: |
           # Create or update a timestamp file
           echo "Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" > timestamp.txt
@@ -35,6 +67,7 @@ jobs:
           echo "" >> timestamp.txt  # Add empty line for readability
 
       - name: Commit changes
+        if: steps.build-test.outcome == 'success'
         run: |
           git add timestamp.txt
           # Only commit if there are changes
@@ -47,6 +80,7 @@ jobs:
           fi
 
       - name: Push changes
+        if: steps.build-test.outcome == 'success'
         run: |
           git push origin HEAD:${{ github.ref }}
           echo "Changes pushed successfully"

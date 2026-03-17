@@ -12,7 +12,7 @@ permissions:
 jobs:
   update-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     
     steps:
       - name: Checkout repository
@@ -28,13 +28,13 @@ jobs:
         run: |
           # Build both packages
           echo "Building opencode..."
-          nix build .#opencode
+          nix build .#opencode --no-link
           echo "Building opencode-avx..."
-          nix build .#opencode-avx
+          nix build .#opencode-avx --no-link
           
-          # Start OpenCode server for health check
+          # Start OpenCode server for health check using the built binary
           echo "Starting OpenCode server..."
-          nohup opencode serve --port 4096 > opencode-server.log 2>&1 &
+          ./result/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
           SERVER_PID=$!
           
           # Wait for server to start (max 30 seconds)

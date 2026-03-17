@@ -14,7 +14,7 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     
     steps:
       - name: Checkout repository
@@ -24,42 +24,36 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@main
 
       - name: Build opencode package
-        run: nix build .#opencode
+        run: nix build .#opencode --no-link
 
       - name: Build opencode-avx package
-        run: nix build .#opencode-avx
+        run: nix build .#opencode-avx --no-link
 
       - name: Start OpenCode server
         id: opencode-server
         run: |
-          # Start the server in the background
-          nohup opencode serve --port 4096 > opencode-server.log 2>&1 &
+          # Start the server in the background using the built binary
+          echo "Starting OpenCode server from opencode build..."
+          ./result/bin/opencode serve --port 4096 > opencode-server.log 2>&1 &
           SERVER_PID=$!
-          echo $SERVER_PID > opencode-server.pid
           
           # Wait for server to start (max 30 seconds)
           for i in {1..30}; do
             if curl -s http://127.0.0.1:4096/global/health > /dev/null; then
               echo "OpenCode server is healthy"
-              exit 0
+              break
             fi
             sleep 1
           done
           
-          echo "Failed to start OpenCode server"
-          cat opencode-server.log
-          exit 1
-
-      - name: Check OpenCode health
-        if: steps.opencode-server.outcome == 'success'
-        run: |
-          curl -s http://127.0.0.1:4096/global/health
-          echo "Health check passed"
-
-      - name: Stop OpenCode server
-        if: always()
-        run: |
-          if [ -f opencode-server.pid ]; then
-            kill $(cat opencode-server.pid) || true
-            rm opencode-server.pid
+          # Check if server started successfully
+          if ! curl -s http://127.0.0.1:4096/global/health > /dev/null; then
+            echo "Failed to start OpenCode server"
+            cat opencode-server.log
+            kill $SERVER_PID || true
+            exit 1
           fi
+          
+          # Stop server
+          kill $SERVER_PID || true
+          echo "Build and test completed successfully"
