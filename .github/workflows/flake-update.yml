@@ -58,7 +58,11 @@ jobs:
           ./result/bin/opencode --version
           nix run .#opencode-avx -- --version
 
-      - name: Push branch and create PR
+      - name: Push branch
+        if: steps.update.outputs.updates_found == 'true'
+        run: git push origin update-flake-${{ github.run_id }}
+
+      - name: Create PR
         if: steps.update.outputs.updates_found == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
@@ -67,7 +71,6 @@ jobs:
           branch: update-flake-${{ github.run_id }}
           base: main
           delete-branch: true
-          push: true
           title: "chore: weekly automated flake updates"
           body: |
             Weekly automated flake package updates via `update.sh`.
