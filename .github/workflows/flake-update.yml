@@ -40,7 +40,9 @@ jobs:
           nix flake update
 
           # Check if any new commits were made
-          if [ "$(git rev-parse HEAD)" != "${{ steps.update.outputs.initial_commit }}" ]; then
+          FINAL_COMMIT=$(git rev-parse HEAD)
+          echo "DEBUG: initial=$INITIAL_COMMIT final=$FINAL_COMMIT"
+          if [ "$FINAL_COMMIT" != "$INITIAL_COMMIT" ]; then
             echo "updates_found=true" >> $GITHUB_OUTPUT
           else
             echo "updates_found=false" >> $GITHUB_OUTPUT
