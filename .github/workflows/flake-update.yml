@@ -39,9 +39,12 @@ jobs:
           # Update flake inputs
           nix flake update
 
+          # Stage and commit changes
+          git add flake.lock
+          git commit -m "chore: update flake inputs" || echo "No changes to commit"
+
           # Check if any new commits were made
           FINAL_COMMIT=$(git rev-parse HEAD)
-          echo "DEBUG: initial=$INITIAL_COMMIT final=$FINAL_COMMIT"
           if [ "$FINAL_COMMIT" != "$INITIAL_COMMIT" ]; then
             echo "updates_found=true" >> $GITHUB_OUTPUT
           else
