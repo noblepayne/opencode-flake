@@ -4,11 +4,11 @@
   fetchzip,
   patchelf,
 }: let
-  version = "1.14.18";
+  version = "1.14.19";
   srcs = {
     "x86_64-linux" = fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64.tar.gz";
-      hash = "sha256-sMefsKizhyQn+l0tRZyBHaCXkmn/u5xn/WiYH2/qyI8=";
+      hash = "sha256-Ar4j8WoX+G3ceCuEtdctj21raa5nYaJ05ClZhSm25/A=";
       stripRoot = false;
     };
     "x86_64-darwin" = fetchzip {
