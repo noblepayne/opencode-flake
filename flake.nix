@@ -14,6 +14,8 @@
     forAllPkgs = fn: nixpkgs.lib.mapAttrs (system: pkgs: (fn system pkgs)) pkgsBySystem;
 
     avxSystems = ["x86_64-linux" "x86_64-darwin"];
+    # opencode2 (npm beta) only publishes linux-x64 binaries currently
+    opencode2Systems = ["x86_64-linux"];
   in {
     formatter = forAllPkgs (system: pkgs: pkgs.alejandra);
 
@@ -24,6 +26,10 @@
       }
       // nixpkgs.lib.optionalAttrs (builtins.elem system avxSystems) {
         opencode-avx = pkgs.callPackage ./pkgs/opencode-avx.nix {};
+      }
+      // nixpkgs.lib.optionalAttrs (builtins.elem system opencode2Systems) {
+        opencode2 = pkgs.callPackage ./pkgs/opencode2.nix {baseline = true;};
+        opencode2-avx = pkgs.callPackage ./pkgs/opencode2.nix {baseline = false;};
       });
 
     devShells = forAllPkgs (system: pkgs: {
