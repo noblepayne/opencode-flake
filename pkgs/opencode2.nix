@@ -6,12 +6,10 @@
   baseline ? false,
 }: let
   # npm dist-tag "next" — opencode2 beta line (will become 2.0)
-  version = "0.0.0-next-17251";
+  version = "0.0.0-next-17444";
   # Per-platform npm packages that contain the actual binary.
-  # NOTE: at this version the AVX and baseline tarballs contain IDENTICAL ELF
-  # binaries (BuildID c30f169b...) — the AVX/baseline split is a runtime
-  # concern, not a build difference. Both SHAs computed from the exact
-  # tarballs published to npm.
+  # Default stripRoot=true strips the top-level "package/" directory added by
+  # npm during packaging, leaving just bin/opencode2 — standard nixpkgs convention.
   baseName =
     if baseline
     then "cli-linux-x64-baseline"
@@ -20,9 +18,8 @@
     url = "https://registry.npmjs.org/@opencode-ai/${baseName}/-/${baseName}-${version}.tgz";
     hash =
       if baseline
-      then "sha256-XfqtOydJo6tY60Z+iXBAZED1iI+Buh6ECWWo8ofYC3M="
-      else "sha256-cgJXWN2JrVkOuFlIaTsp4oNkYVVKH5ytHRkQGvj8l/U=";
-    stripRoot = false;
+      then "sha256-mNti7qwy5I6fpnNBCSoYlHopLsaNuNDG+EFCBFu26Zk="
+      else "sha256-AlYmaqCgRSQs5IXClxT2TpXmQ0tnANSv/qEOjq/PTSI=";
   };
   needsPatchelf = stdenv.isLinux;
 in
@@ -44,7 +41,7 @@ in
 
     installPhase = ''
       runHook preInstall
-      install -Dm755 package/bin/opencode2 $out/bin/opencode2
+      install -Dm755 bin/opencode2 $out/bin/opencode2
       ${lib.optionalString needsPatchelf ''
         patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/opencode2
       ''}

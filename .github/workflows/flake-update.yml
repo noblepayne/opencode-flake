@@ -55,12 +55,13 @@ jobs:
         if: steps.update.outputs.updates_found == 'true'
         run: |
           echo "Updates found, validating build..."
-          nix build .#opencode
-          nix build .#opencode-avx
+          nix build .#opencode .#opencode-avx .#opencode2 .#opencode2-avx
 
           echo "Validating binaries..."
-          ./result/bin/opencode --version
+          nix run .#opencode -- --version
           nix run .#opencode-avx -- --version
+          nix run .#opencode2 -- --version
+          nix run .#opencode2-avx -- --version
 
       - name: Push branch
         if: steps.update.outputs.updates_found == 'true'

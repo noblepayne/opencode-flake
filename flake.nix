@@ -40,6 +40,9 @@
 
     overlays.default = final: prev: {
       opencode = final.callPackage ./pkgs/opencode.nix {};
+      opencode-avx = final.callPackage ./pkgs/opencode-avx.nix {};
+      opencode2 = final.callPackage ./pkgs/opencode2.nix {baseline = true;};
+      opencode2-avx = final.callPackage ./pkgs/opencode2.nix {baseline = false;};
     };
   };
 }
