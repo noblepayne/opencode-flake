@@ -63,6 +63,12 @@ jobs:
           nix run .#opencode2 -- --version
           nix run .#opencode2-avx -- --version
 
+      - name: Clean build artifacts
+        if: steps.update.outputs.updates_found == 'true'
+        run: |
+          git clean -fd
+          rm -f result result-*
+
       - name: Push branch
         if: steps.update.outputs.updates_found == 'true'
         run: git push origin update-flake-${{ github.run_id }}
