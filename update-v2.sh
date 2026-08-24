@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fetch current "next" version from npm
-VERSION=$(curl -sL https://registry.npmjs.org/@opencode-ai/cli-linux-x64/next | python3 -c "import sys, json; print(json.load(sys.stdin)['version'])")
+# Fetch current "beta" version from npm (v2 line moved off the stale "next" tag)
+VERSION=$(curl -sL https://registry.npmjs.org/@opencode-ai/cli-linux-x64 | python3 -c "import sys, json; print(json.load(sys.stdin)['dist-tags']['beta'])")
 echo "Updating opencode2 to $VERSION..."
 
 CURRENT_VERSION=$(python3 -c '
