@@ -6,7 +6,7 @@
   baseline ? false,
 }: let
   # npm dist-tag "next" — opencode2 beta line (will become 2.0)
-  version = "0.0.0-beta-18999";
+  version = "0.0.0-beta-19086";
   # Per-platform npm packages that contain the actual binary.
   # Default stripRoot=true strips the top-level "package/" directory added by
   # npm during packaging, leaving just bin/opencode2 — standard nixpkgs convention.
@@ -18,8 +18,8 @@
     url = "https://registry.npmjs.org/@opencode-ai/${baseName}/-/${baseName}-${version}.tgz";
     hash =
       if baseline
-      then "sha256-eI4XbIPWeuC6m5PShxZSTiL0SLUWVZ8Ur+xnF6eNNP4="
-      else "sha256-Zu50RWVoR5bnXT2V3CgytOei1Mcioh8t+Np+KXwd3p8=";
+      then "sha256-P2V157gyhZoPZJdGzg7rQiBlCiY7oQ0aHFBM5/FWFCs="
+      else "sha256-QBk6hgzjDey9doy6yWMeMM6dpCFXhSXF1wX2AhE8c8s=";
   };
   needsPatchelf = stdenv.isLinux;
 in
