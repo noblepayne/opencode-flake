@@ -14,7 +14,14 @@
     forAllPkgs = fn: nixpkgs.lib.mapAttrs (system: pkgs: (fn system pkgs)) pkgsBySystem;
 
     avxSystems = ["x86_64-linux" "x86_64-darwin"];
-    # opencode2 (npm beta) only publishes linux-x64 binaries currently
+    # opencode2 (v2 stable, @opencode npm scope) — linux-x64 for now.
+    # NOTE (multi-platform, not enabled): upstream also publishes
+    #   @opencode/cli-darwin-arm64, cli-darwin-x64 (+ -baseline),
+    #   cli-linux-arm64 (+ -baseline, -musl), cli-linux-x64-musl (+ -baseline),
+    #   cli-windows-{x64,arm64} (zip, not fetchzip-tarball).
+    # Enabling more systems needs pkgs/opencode2.nix to parameterize baseName
+    # per system (currently hardcoded to cli-linux-x64[-baseline]) plus
+    # hashes per platform — not just widening this list.
     opencode2Systems = ["x86_64-linux"];
   in {
     formatter = forAllPkgs (system: pkgs: pkgs.alejandra);

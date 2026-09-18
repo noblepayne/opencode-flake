@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fetch current "beta" version from npm (v2 line moved off the stale "next" tag)
-VERSION=$(curl -sL https://registry.npmjs.org/@opencode-ai/cli-linux-x64 | python3 -c "import sys, json; print(json.load(sys.stdin)['dist-tags']['beta'])")
+# Fetch current "latest" version from npm (@opencode scope, v2 stable line)
+VERSION=$(curl -sL https://registry.npmjs.org/@opencode/cli-linux-x64 | python3 -c "import sys, json; print(json.load(sys.stdin)['dist-tags']['latest'])")
 echo "Updating opencode2 to $VERSION..."
 
 CURRENT_VERSION=$(python3 -c '
@@ -17,8 +17,8 @@ if [ "$VERSION" = "$CURRENT_VERSION" ]; then
     exit 0
 fi
 
-URL_AVX="https://registry.npmjs.org/@opencode-ai/cli-linux-x64/-/cli-linux-x64-${VERSION}.tgz"
-URL_BASE="https://registry.npmjs.org/@opencode-ai/cli-linux-x64-baseline/-/cli-linux-x64-baseline-${VERSION}.tgz"
+URL_AVX="https://registry.npmjs.org/@opencode/cli-linux-x64/-/cli-linux-x64-${VERSION}.tgz"
+URL_BASE="https://registry.npmjs.org/@opencode/cli-linux-x64-baseline/-/cli-linux-x64-baseline-${VERSION}.tgz"
 
 HASH_AVX=$(nix store prefetch-file --unpack --json "$URL_AVX" | python3 -c "import sys, json; print(json.load(sys.stdin)['hash'])")
 HASH_BASE=$(nix store prefetch-file --unpack --json "$URL_BASE" | python3 -c "import sys, json; print(json.load(sys.stdin)['hash'])")

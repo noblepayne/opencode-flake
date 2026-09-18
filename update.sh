@@ -7,7 +7,7 @@ nix-update opencode --flake --commit
 echo "Updating opencode-avx..."
 nix-update opencode-avx --flake --commit
 
-echo "Updating opencode2 (v2 beta)..."
+echo "Updating opencode2 (v2 stable)..."
 ./update-v2.sh
 
 echo "All done!"
