@@ -51,17 +51,24 @@ jobs:
             echo "updates_found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and validate updates
+      - name: Build and validate updates (v2)
         if: steps.update.outputs.updates_found == 'true'
         run: |
-          echo "Updates found, validating build..."
-          nix build .#opencode .#opencode-avx .#opencode2 .#opencode2-avx
+          echo "Updates found, validating v2 build..."
+          nix build .#opencode2 .#opencode2-avx
 
-          echo "Validating binaries..."
-          nix run .#opencode -- --version
-          nix run .#opencode-avx -- --version
+          echo "Validating v2 binaries..."
           nix run .#opencode2 -- --version
           nix run .#opencode2-avx -- --version
+
+      # v1 is frozen legacy (see update.sh) — advisory only, never blocks the PR.
+      - name: Build and validate v1 (legacy, advisory)
+        if: steps.update.outputs.updates_found == 'true'
+        continue-on-error: true
+        run: |
+          nix build .#opencode .#opencode-avx
+          nix run .#opencode -- --version
+          nix run .#opencode-avx -- --version
 
       - name: Clean build artifacts
         if: steps.update.outputs.updates_found == 'true'

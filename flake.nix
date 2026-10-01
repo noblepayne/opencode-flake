@@ -23,6 +23,11 @@
     # per system (currently hardcoded to cli-linux-x64[-baseline]) plus
     # hashes per platform — not just widening this list.
     opencode2Systems = ["x86_64-linux"];
+  # v1 packages (opencode / opencode-avx) remain available for anyone still on
+    # the 1.x line, but are FROZEN and no longer auto-updated: upstream ships v2
+    # tags on the same GitHub repo, which made nix-update chase v2 versions for
+    # the v1 package and fail on 404s, taking the v2 updater down with it.
+    # See update.sh.
   in {
     formatter = forAllPkgs (system: pkgs: pkgs.alejandra);
 

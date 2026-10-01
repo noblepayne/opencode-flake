@@ -23,17 +23,20 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
-      - name: Build and validate opencode packages
+      - name: Build and validate opencode2 (v2)
         run: |
-          # Build all opencode packages (creates ./result symlinks)
-          echo "Building opencode packages..."
-          nix build .#opencode .#opencode-avx .#opencode2 .#opencode2-avx
-          
-          # Validate that the binaries work by running version checks
-          echo "Validating opencode binaries..."
-          nix run .#opencode -- --version
-          nix run .#opencode-avx -- --version
+          echo "Building opencode2 packages..."
+          nix build .#opencode2 .#opencode2-avx
+          echo "Validating opencode2 binaries..."
           nix run .#opencode2 -- --version
           nix run .#opencode2-avx -- --version
-          
-          echo "Build and validation completed successfully"
+          echo "opencode2 build and validation completed successfully"
+
+      # v1 is frozen legacy (see update.sh) — advisory only.
+      - name: Build and validate v1 (legacy, advisory)
+        continue-on-error: true
+        run: |
+          echo "Building frozen v1 packages..."
+          nix build .#opencode .#opencode-avx
+          nix run .#opencode -- --version
+          nix run .#opencode-avx -- --version

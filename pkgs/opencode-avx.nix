@@ -4,6 +4,8 @@
   fetchzip,
   patchelf,
 }: let
+  # FROZEN legacy v1. Not auto-updated — see ../update.sh for why. Kept building
+  # so existing consumers don't break; the maintained line is opencode2-avx.
   version = "1.18.33";
   srcs = {
     "x86_64-linux" = fetchzip {

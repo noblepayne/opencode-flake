@@ -4,7 +4,12 @@
   fetchzip,
   patchelf,
 }: let
+  # FROZEN legacy v1. Not auto-updated — see ../update.sh for why. Keep this pin
+  # working (don't chase upstream); the maintained line is opencode2.
   version = "1.18.33";
+  # NOTE: at 1.18.33 upstream ships byte-identical baseline and AVX tarballs
+  # (both prefetch to sha256-J840fbg...), so the avx/baseline split that gave
+  # this file and opencode-avx.nix distinct hashes is now vestigial.
   srcs = {
     "x86_64-linux" = fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-baseline.tar.gz";
