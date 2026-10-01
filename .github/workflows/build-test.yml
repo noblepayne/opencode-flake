@@ -11,17 +11,28 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+
+      # Cheap eval across every system the flake claims. Catches malformed
+      # expressions and missing attributes on platforms CI never builds for.
+      # (It cannot catch a bad *hash* — that needs an actual build — which is
+      # why the v1 placeholder hashes survived six months of green runs.)
+      - name: Evaluate flake on all declared systems
+        run: nix flake check --no-build --all-systems
 
       - name: Build and validate opencode2 (v2)
         run: |
@@ -30,6 +41,12 @@ jobs:
           echo "Validating opencode2 binaries..."
           nix run .#opencode2 -- --version
           nix run .#opencode2-avx -- --version
+
+          # Assert the binary actually reports the pinned version, rather than
+          # just exiting 0 with plausible output.
+          PINNED=$(nix eval --raw .#opencode2-avx.version)
+          echo "flake pin: $PINNED"
+          nix run .#opencode2-avx -- --version | tee /dev/stderr | grep -qF "$PINNED"
           echo "opencode2 build and validation completed successfully"
 
       # v1 is frozen legacy (see update.sh) — advisory only.

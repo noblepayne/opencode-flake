@@ -21,7 +21,7 @@
       then "sha256-qzFlpjdjPutTVKjrxx1HrB2NGgHal1mcVgv2ilCd8lM="
       else "sha256-QtWY+x0r6nBjxQ6r9DEFcKtYPg3NxgrHcqwLQCvMQ0w=";
   };
-  needsPatchelf = stdenv.isLinux;
+  needsPatchelf = stdenv.hostPlatform.isLinux;
 in
   stdenv.mkDerivation {
     pname =
@@ -30,7 +30,9 @@ in
       else "opencode2";
     inherit version;
 
-    src = src;
+    # The `let`-bound `src` above is already in scope; re-assigning it here
+    # read like a platform dispatch that does not exist.
+    inherit src;
 
     nativeBuildInputs = lib.optionals needsPatchelf [patchelf];
 
@@ -49,7 +51,9 @@ in
     '';
 
     meta = with lib; {
-      description = "AI coding agent built for the terminal (opencode v2 stable)";
+      description =
+        "AI coding agent built for the terminal (opencode v2 stable)"
+        + lib.optionalString baseline " (baseline build — NOT an AVX-free fallback)";
       homepage = "https://github.com/anomalyco/opencode";
       license = licenses.mit;
       platforms = ["x86_64-linux"];

@@ -1,3 +1,10 @@
 result
 result-*
+
+# Workstation-specific operational notes. docs/v2-cutover-spec.md contains
+# NetBird tailnet IPs, absolute home paths, and a database inventory for a
+# public repo. Keep it local; git history is forever and `git add -A` is one
+# keystroke away.
+docs/
+
 .clojure-mcp
