@@ -6,7 +6,7 @@
   baseline ? false,
 }: let
   # npm dist-tag "latest" on @opencode scope — v2 stable line
-  version = "2.2.6";
+  version = "2.2.7";
   # Per-platform npm packages that contain the actual binary.
   # Default stripRoot=true strips the top-level "package/" directory added by
   # npm during packaging, leaving just bin/opencode — standard nixpkgs convention.
@@ -18,8 +18,8 @@
     url = "https://registry.npmjs.org/@opencode/${baseName}/-/${baseName}-${version}.tgz";
     hash =
       if baseline
-      then "sha256-ePvb+CqQ/rZl4Ipj0r9jZ4jcguaKYKVC8SrLV35Ds2Y="
-      else "sha256-8XOxTUmFcGBx3y6g9nNl10MudhEkyWYU1x2WykeH6D4=";
+      then "sha256-ydxQ1ayI0umPEbbzhdKWzB0oUzlRByl5+bxrrC1/Piw="
+      else "sha256-8oKmoKTWcXbhCFoeEpQ6EnK8NUC0eLD+DaSuANTZ2Mk=";
   };
   needsPatchelf = stdenv.hostPlatform.isLinux;
 in
